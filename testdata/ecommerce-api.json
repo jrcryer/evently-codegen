@@ -1,0 +1,498 @@
+{
+  "asyncapi": "2.6.0",
+  "info": {
+    "title": "E-commerce Events API",
+    "version": "1.2.0",
+    "description": "Event-driven API for e-commerce operations including orders, payments, and inventory management",
+    "contact": {
+      "name": "E-commerce Team",
+      "email": "ecommerce-team@example.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    }
+  },
+  "channels": {
+    "order/created": {
+      "description": "Channel for order creation events",
+      "publish": {
+        "operationId": "handleOrderCreated",
+        "summary": "Handle order creation event",
+        "message": {
+          "name": "OrderCreatedEvent",
+          "title": "Order Created Event",
+          "summary": "Event triggered when a new order is created",
+          "payload": {
+            "$ref": "#/components/schemas/OrderCreatedPayload"
+          }
+        }
+      }
+    },
+    "order/updated": {
+      "description": "Channel for order update events",
+      "publish": {
+        "operationId": "handleOrderUpdated",
+        "summary": "Handle order update event",
+        "message": {
+          "name": "OrderUpdatedEvent",
+          "title": "Order Updated Event",
+          "summary": "Event triggered when an order is updated",
+          "payload": {
+            "$ref": "#/components/schemas/OrderUpdatedPayload"
+          }
+        }
+      }
+    },
+    "payment/processed": {
+      "description": "Channel for payment processing events",
+      "publish": {
+        "operationId": "handlePaymentProcessed",
+        "summary": "Handle payment processed event",
+        "message": {
+          "name": "PaymentProcessedEvent",
+          "title": "Payment Processed Event",
+          "summary": "Event triggered when a payment is processed",
+          "payload": {
+            "$ref": "#/components/schemas/PaymentProcessedPayload"
+          }
+        }
+      }
+    },
+    "inventory/updated": {
+      "description": "Channel for inventory update events",
+      "publish": {
+        "operationId": "handleInventoryUpdated",
+        "summary": "Handle inventory update event",
+        "message": {
+          "name": "InventoryUpdatedEvent",
+          "title": "Inventory Updated Event",
+          "summary": "Event triggered when inventory levels change",
+          "payload": {
+            "$ref": "#/components/schemas/InventoryUpdatedPayload"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OrderCreatedPayload": {
+        "type": "object",
+        "description": "Payload for order creation events",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "Unique order identifier",
+            "example": "order_123456789"
+          },
+          "customerId": {
+            "type": "string",
+            "description": "Customer identifier",
+            "example": "customer_987654321"
+          },
+          "orderNumber": {
+            "type": "string",
+            "description": "Human-readable order number",
+            "example": "ORD-2023-001234"
+          },
+          "items": {
+            "type": "array",
+            "description": "List of ordered items",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "shippingAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "billingAddress": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "float",
+            "description": "Total order amount",
+            "example": 299.99
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code",
+            "example": "USD"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"],
+            "description": "Order status",
+            "example": "pending"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["credit_card", "debit_card", "paypal", "bank_transfer", "cash_on_delivery"],
+            "description": "Payment method used",
+            "example": "credit_card"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Order creation timestamp",
+            "example": "2023-12-01T14:30:00Z"
+          },
+          "estimatedDelivery": {
+            "type": "string",
+            "format": "date",
+            "description": "Estimated delivery date",
+            "example": "2023-12-05"
+          }
+        },
+        "required": ["orderId", "customerId", "orderNumber", "items", "totalAmount", "currency", "status", "createdAt"]
+      },
+      "OrderUpdatedPayload": {
+        "type": "object",
+        "description": "Payload for order update events",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "Unique order identifier"
+          },
+          "customerId": {
+            "type": "string",
+            "description": "Customer identifier"
+          },
+          "previousStatus": {
+            "type": "string",
+            "enum": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"],
+            "description": "Previous order status"
+          },
+          "newStatus": {
+            "type": "string",
+            "enum": ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"],
+            "description": "New order status"
+          },
+          "updatedFields": {
+            "type": "array",
+            "description": "List of fields that were updated",
+            "items": {
+              "type": "string"
+            }
+          },
+          "trackingNumber": {
+            "type": "string",
+            "description": "Shipping tracking number (if applicable)"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Order update timestamp"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes about the update"
+          }
+        },
+        "required": ["orderId", "customerId", "newStatus", "updatedAt"]
+      },
+      "PaymentProcessedPayload": {
+        "type": "object",
+        "description": "Payload for payment processing events",
+        "properties": {
+          "paymentId": {
+            "type": "string",
+            "description": "Unique payment identifier",
+            "example": "payment_abc123def456"
+          },
+          "orderId": {
+            "type": "string",
+            "description": "Associated order identifier",
+            "example": "order_123456789"
+          },
+          "customerId": {
+            "type": "string",
+            "description": "Customer identifier",
+            "example": "customer_987654321"
+          },
+          "amount": {
+            "type": "number",
+            "format": "float",
+            "description": "Payment amount",
+            "example": 299.99
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code",
+            "example": "USD"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": ["credit_card", "debit_card", "paypal", "bank_transfer", "cash_on_delivery"],
+            "description": "Payment method used"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "processing", "completed", "failed", "cancelled", "refunded"],
+            "description": "Payment status",
+            "example": "completed"
+          },
+          "transactionId": {
+            "type": "string",
+            "description": "External transaction identifier from payment processor"
+          },
+          "processedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Payment processing timestamp",
+            "example": "2023-12-01T14:35:00Z"
+          },
+          "fees": {
+            "$ref": "#/components/schemas/PaymentFees"
+          }
+        },
+        "required": ["paymentId", "orderId", "customerId", "amount", "currency", "paymentMethod", "status", "processedAt"]
+      },
+      "InventoryUpdatedPayload": {
+        "type": "object",
+        "description": "Payload for inventory update events",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Product identifier",
+            "example": "product_xyz789"
+          },
+          "sku": {
+            "type": "string",
+            "description": "Stock keeping unit",
+            "example": "SKU-LAPTOP-001"
+          },
+          "warehouseId": {
+            "type": "string",
+            "description": "Warehouse identifier",
+            "example": "warehouse_main_001"
+          },
+          "previousQuantity": {
+            "type": "integer",
+            "description": "Previous inventory quantity",
+            "example": 50
+          },
+          "newQuantity": {
+            "type": "integer",
+            "description": "New inventory quantity",
+            "example": 45
+          },
+          "changeType": {
+            "type": "string",
+            "enum": ["sale", "restock", "adjustment", "return", "damage", "theft"],
+            "description": "Type of inventory change",
+            "example": "sale"
+          },
+          "changeQuantity": {
+            "type": "integer",
+            "description": "Quantity of change (positive or negative)",
+            "example": -5
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for inventory change"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Inventory update timestamp",
+            "example": "2023-12-01T14:40:00Z"
+          },
+          "lowStockThreshold": {
+            "type": "integer",
+            "description": "Low stock alert threshold",
+            "example": 10
+          },
+          "isLowStock": {
+            "type": "boolean",
+            "description": "Whether the item is now below low stock threshold",
+            "example": false
+          }
+        },
+        "required": ["productId", "sku", "warehouseId", "newQuantity", "changeType", "changeQuantity", "updatedAt"]
+      },
+      "OrderItem": {
+        "type": "object",
+        "description": "Individual item in an order",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Product identifier",
+            "example": "product_xyz789"
+          },
+          "sku": {
+            "type": "string",
+            "description": "Stock keeping unit",
+            "example": "SKU-LAPTOP-001"
+          },
+          "name": {
+            "type": "string",
+            "description": "Product name",
+            "example": "Gaming Laptop Pro"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Quantity ordered",
+            "example": 1
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "float",
+            "description": "Price per unit",
+            "example": 1299.99
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "float",
+            "description": "Total price for this item",
+            "example": 1299.99
+          },
+          "variant": {
+            "$ref": "#/components/schemas/ProductVariant"
+          },
+          "customizations": {
+            "type": "array",
+            "description": "Product customizations",
+            "items": {
+              "$ref": "#/components/schemas/ProductCustomization"
+            }
+          }
+        },
+        "required": ["productId", "sku", "name", "quantity", "unitPrice", "totalPrice"]
+      },
+      "Address": {
+        "type": "object",
+        "description": "Address information",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "First name",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Last name",
+            "example": "Doe"
+          },
+          "company": {
+            "type": "string",
+            "description": "Company name"
+          },
+          "addressLine1": {
+            "type": "string",
+            "description": "First line of address",
+            "example": "123 Main Street"
+          },
+          "addressLine2": {
+            "type": "string",
+            "description": "Second line of address"
+          },
+          "city": {
+            "type": "string",
+            "description": "City name",
+            "example": "New York"
+          },
+          "state": {
+            "type": "string",
+            "description": "State or province",
+            "example": "NY"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Postal or ZIP code",
+            "example": "10001"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country name",
+            "example": "United States"
+          },
+          "countryCode": {
+            "type": "string",
+            "description": "ISO country code",
+            "example": "US"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number",
+            "example": "+1-555-123-4567"
+          }
+        },
+        "required": ["firstName", "lastName", "addressLine1", "city", "state", "postalCode", "country"]
+      },
+      "ProductVariant": {
+        "type": "object",
+        "description": "Product variant information",
+        "properties": {
+          "color": {
+            "type": "string",
+            "description": "Product color",
+            "example": "Space Gray"
+          },
+          "size": {
+            "type": "string",
+            "description": "Product size",
+            "example": "15-inch"
+          },
+          "material": {
+            "type": "string",
+            "description": "Product material"
+          },
+          "style": {
+            "type": "string",
+            "description": "Product style"
+          }
+        }
+      },
+      "ProductCustomization": {
+        "type": "object",
+        "description": "Product customization option",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Customization type",
+            "example": "engraving"
+          },
+          "value": {
+            "type": "string",
+            "description": "Customization value",
+            "example": "John's Laptop"
+          },
+          "additionalCost": {
+            "type": "number",
+            "format": "float",
+            "description": "Additional cost for customization",
+            "example": 25.00
+          }
+        },
+        "required": ["type", "value"]
+      },
+      "PaymentFees": {
+        "type": "object",
+        "description": "Payment processing fees",
+        "properties": {
+          "processingFee": {
+            "type": "number",
+            "format": "float",
+            "description": "Payment processing fee",
+            "example": 8.99
+          },
+          "transactionFee": {
+            "type": "number",
+            "format": "float",
+            "description": "Transaction fee",
+            "example": 0.30
+          },
+          "totalFees": {
+            "type": "number",
+            "format": "float",
+            "description": "Total fees charged",
+            "example": 9.29
+          }
+        },
+        "required": ["totalFees"]
+      }
+    }
+  }
+}

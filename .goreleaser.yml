@@ -1,0 +1,198 @@
+# AsyncAPI Go Code Generator - GoReleaser configuration
+# https://goreleaser.com/customization/
+
+project_name: evently-codegen
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: evently-codegen
+    main: ./cmd/evently-codegen
+    binary: evently-codegen
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    goarm:
+      - 7
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/jrcryer/evently-codegen/internal/version.Version={{.Version}}
+      - -X github.com/jrcryer/evently-codegen/internal/version.BuildTime={{.Date}}
+      - -X github.com/jrcryer/evently-codegen/internal/version.GitCommit={{.Commit}}
+      - -X github.com/jrcryer/evently-codegen/internal/version.GitBranch={{.Branch}}
+
+archives:
+  - id: evently-codegen
+    builds:
+      - evently-codegen
+    name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - '^style:'
+      - '^refactor:'
+  groups:
+    - title: Features
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Bug fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: 'Performance improvements'
+      regexp: "^.*perf[(\\w)]*:+.*$"
+      order: 2
+    - title: Others
+      order: 999
+
+release:
+  github:
+    owner: your-org
+    name: asyncapi-go-codegen
+  draft: false
+  prerelease: auto
+  mode: replace
+  header: |
+    ## AsyncAPI Go Code Generator {{ .Tag }}
+    
+    Welcome to this new release of AsyncAPI Go Code Generator!
+    
+    ### Installation
+    
+    #### Quick Install
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/jrcryer/evently-codegen/main/scripts/install.sh | bash
+    ```
+    
+    #### Go Install
+    ```bash
+    go install github.com/jrcryer/evently-codegen/cmd/evently-codegen@{{ .Tag }}
+    ```
+    
+    #### Docker
+    ```bash
+    docker pull ghcr.io/jrcryer/evently-codegen:{{ .Tag }}
+    ```
+  footer: |
+    **Full Changelog**: https://github.com/jrcryer/evently-codegen/compare/{{ .PreviousTag }}...{{ .Tag }}
+    
+    ## Thanks
+    
+    Thanks to all contributors who made this release possible!
+
+dockers:
+  - image_templates:
+      - "ghcr.io/jrcryer/evently-codegen:{{ .Tag }}"
+      - "ghcr.io/jrcryer/evently-codegen:v{{ .Major }}"
+      - "ghcr.io/jrcryer/evently-codegen:v{{ .Major }}.{{ .Minor }}"
+      - "ghcr.io/jrcryer/evently-codegen:latest"
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://github.com/jrcryer/evently-codegen"
+      - "--label=org.opencontainers.image.licenses=MIT"
+    extra_files:
+      - testdata/
+
+brews:
+  - name: evently-codegen
+    tap:
+      owner: your-org
+      name: homebrew-asyncapi-go-codegen
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    folder: Formula
+    homepage: https://github.com/jrcryer/evently-codegen
+    description: "Generate Go type definitions from AsyncAPI specifications"
+    license: MIT
+    test: |
+      system "#{bin}/evently-codegen --version"
+    install: |
+      bin.install "evently-codegen"
+
+nfpms:
+  - id: evently-codegen
+    package_name: evently-codegen
+    vendor: AsyncAPI Go Code Generator Contributors
+    homepage: https://github.com/jrcryer/evently-codegen
+    maintainer: Your Name <your.email@example.com>
+    description: Generate Go type definitions from AsyncAPI specifications
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    bindir: /usr/bin
+    contents:
+      - src: ./README.md
+        dst: /usr/share/doc/evently-codegen/README.md
+      - src: ./LICENSE
+        dst: /usr/share/doc/evently-codegen/LICENSE
+
+publishers:
+  - name: fury.io
+    ids:
+      - evently-codegen
+    dir: "{{ dir .ArtifactPath }}"
+    cmd: curl -F package=@{{ .ArtifactName }} https://{{ .Env.FURY_TOKEN }}@push.fury.io/{{ .Env.FURY_USER }}/
+
+announce:
+  skip: '{{gt .Patch 0}}'
+  
+  discord:
+    enabled: true
+    message_template: 'AsyncAPI Go Code Generator {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
+
+  slack:
+    enabled: true
+    message_template: 'AsyncAPI Go Code Generator {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
+    channel: '#releases'
+
+  twitter:
+    enabled: true
+    message_template: 'AsyncAPI Go Code Generator {{ .Tag }} is out! 🚀 Generate Go types from AsyncAPI specs. Check it out at {{ .ReleaseURL }} #golang #asyncapi #codegen'
+
+  reddit:
+    enabled: true
+    title_template: 'AsyncAPI Go Code Generator {{ .Tag }} is out!'
+    url_template: '{{ .ReleaseURL }}'
+
+  linkedin:
+    enabled: true
+    message_template: 'AsyncAPI Go Code Generator {{ .Tag }} is out! Generate Go type definitions from AsyncAPI specifications. Check it out at {{ .ReleaseURL }}'

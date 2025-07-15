@@ -1,0 +1,289 @@
+asyncapi: '2.6.0'
+info:
+  title: User Service API
+  version: '1.0.0'
+  description: Event-driven API for user management operations
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+channels:
+  user/signup:
+    description: Channel for user signup events
+    publish:
+      operationId: handleUserSignup
+      summary: Handle user signup event
+      message:
+        name: UserSignupEvent
+        title: User Signup Event
+        summary: Event triggered when a user signs up
+        payload:
+          $ref: '#/components/schemas/UserSignupPayload'
+
+  user/profile-updated:
+    description: Channel for user profile update events
+    publish:
+      operationId: handleProfileUpdate
+      summary: Handle profile update event
+      message:
+        name: ProfileUpdateEvent
+        title: Profile Update Event
+        summary: Event triggered when user profile is updated
+        payload:
+          $ref: '#/components/schemas/ProfileUpdatePayload'
+
+  user/deleted:
+    description: Channel for user deletion events
+    publish:
+      operationId: handleUserDeletion
+      summary: Handle user deletion event
+      message:
+        name: UserDeletedEvent
+        title: User Deleted Event
+        summary: Event triggered when a user is deleted
+        payload:
+          $ref: '#/components/schemas/UserDeletedPayload'
+
+components:
+  schemas:
+    UserSignupPayload:
+      type: object
+      description: Payload for user signup events
+      properties:
+        userId:
+          type: string
+          description: Unique identifier for the user
+          example: "user_123456"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "john.doe@example.com"
+        username:
+          type: string
+          description: User's chosen username
+          example: "johndoe"
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+        preferences:
+          $ref: '#/components/schemas/UserPreferences'
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: "2023-12-01T10:30:00Z"
+        metadata:
+          type: object
+          description: Additional metadata
+          additionalProperties:
+            type: string
+      required:
+        - userId
+        - email
+        - username
+        - createdAt
+
+    ProfileUpdatePayload:
+      type: object
+      description: Payload for profile update events
+      properties:
+        userId:
+          type: string
+          description: Unique identifier for the user
+        updatedFields:
+          type: array
+          description: List of fields that were updated
+          items:
+            type: string
+        oldProfile:
+          $ref: '#/components/schemas/UserProfile'
+        newProfile:
+          $ref: '#/components/schemas/UserProfile'
+        updatedAt:
+          type: string
+          format: date-time
+          description: Profile update timestamp
+      required:
+        - userId
+        - updatedFields
+        - newProfile
+        - updatedAt
+
+    UserDeletedPayload:
+      type: object
+      description: Payload for user deletion events
+      properties:
+        userId:
+          type: string
+          description: Unique identifier for the deleted user
+        email:
+          type: string
+          format: email
+          description: Email of the deleted user
+        deletedAt:
+          type: string
+          format: date-time
+          description: Account deletion timestamp
+        reason:
+          type: string
+          enum:
+            - user_request
+            - admin_action
+            - policy_violation
+            - inactivity
+          description: Reason for account deletion
+      required:
+        - userId
+        - email
+        - deletedAt
+        - reason
+
+    UserProfile:
+      type: object
+      description: User profile information
+      properties:
+        firstName:
+          type: string
+          description: User's first name
+          example: "John"
+        lastName:
+          type: string
+          description: User's last name
+          example: "Doe"
+        displayName:
+          type: string
+          description: User's display name
+          example: "John D."
+        bio:
+          type: string
+          description: User's biography
+          example: "Software developer passionate about clean code"
+        avatar:
+          type: string
+          format: uri
+          description: URL to user's avatar image
+          example: "https://example.com/avatars/user123.jpg"
+        dateOfBirth:
+          type: string
+          format: date
+          description: User's date of birth
+          example: "1990-05-15"
+        location:
+          $ref: '#/components/schemas/Location'
+        socialLinks:
+          type: array
+          description: User's social media links
+          items:
+            $ref: '#/components/schemas/SocialLink'
+
+    UserPreferences:
+      type: object
+      description: User preferences and settings
+      properties:
+        language:
+          type: string
+          description: Preferred language code
+          example: "en-US"
+          default: "en-US"
+        timezone:
+          type: string
+          description: User's timezone
+          example: "America/New_York"
+        notifications:
+          $ref: '#/components/schemas/NotificationSettings'
+        privacy:
+          $ref: '#/components/schemas/PrivacySettings'
+
+    Location:
+      type: object
+      description: Geographic location information
+      properties:
+        city:
+          type: string
+          description: City name
+          example: "New York"
+        state:
+          type: string
+          description: State or province
+          example: "NY"
+        country:
+          type: string
+          description: Country name
+          example: "United States"
+        countryCode:
+          type: string
+          description: ISO country code
+          example: "US"
+
+    SocialLink:
+      type: object
+      description: Social media link
+      properties:
+        platform:
+          type: string
+          enum:
+            - twitter
+            - linkedin
+            - github
+            - facebook
+            - instagram
+          description: Social media platform
+        url:
+          type: string
+          format: uri
+          description: URL to the social media profile
+        username:
+          type: string
+          description: Username on the platform
+      required:
+        - platform
+        - url
+
+    NotificationSettings:
+      type: object
+      description: User notification preferences
+      properties:
+        email:
+          type: boolean
+          description: Enable email notifications
+          default: true
+        push:
+          type: boolean
+          description: Enable push notifications
+          default: true
+        sms:
+          type: boolean
+          description: Enable SMS notifications
+          default: false
+        marketing:
+          type: boolean
+          description: Enable marketing communications
+          default: false
+
+    PrivacySettings:
+      type: object
+      description: User privacy settings
+      properties:
+        profileVisibility:
+          type: string
+          enum:
+            - public
+            - friends
+            - private
+          description: Profile visibility level
+          default: "public"
+        showEmail:
+          type: boolean
+          description: Show email in public profile
+          default: false
+        showLocation:
+          type: boolean
+          description: Show location in public profile
+          default: true
+        allowMessaging:
+          type: boolean
+          description: Allow direct messages from other users
+          default: true
