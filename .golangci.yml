@@ -58,6 +58,9 @@ linters:
     - wastedassign
     - whitespace
     - wsl
+  exclusions:
+    paths: 
+      - ".*_test\\.go$"
 
 issues:
   max-issues-per-linter: 0
