@@ -1,112 +1,14 @@
 # AsyncAPI Go Code Generator - golangci-lint configuration
 # https://golangci-lint.run/usage/configuration/
 
+version: "2"
+
 run:
   timeout: 5m
   issues-exit-code: 1
   tests: true
-  skip-dirs:
-    - vendor
-    - testdata
-    - examples
-  skip-files:
-    - ".*\\.pb\\.go$"
-    - ".*_generated\\.go$"
-
-output:
-  format: colored-line-number
-  print-issued-lines: true
-  print-linter-name: true
-  uniq-by-line: true
-  sort-results: true
-
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-    exclude-functions:
-      - fmt.Print
-      - fmt.Println
-      - fmt.Printf
-
-  govet:
-    check-shadowing: true
-    enable-all: true
-    disable:
-      - fieldalignment # Too strict for this project
-
-  gocyclo:
-    min-complexity: 15
-
-  gofmt:
-    simplify: true
-
-  goimports:
-    local-prefixes: github.com/jrcryer/evently-codegen
-
-  golint:
-    min-confidence: 0.8
-
-  goconst:
-    min-len: 3
-    min-occurrences: 3
-
-  misspell:
-    locale: US
-
-  lll:
-    line-length: 120
-    tab-width: 4
-
-  unused:
-    check-exported: false
-
-  unparam:
-    check-exported: false
-
-  nakedret:
-    max-func-lines: 30
-
-  prealloc:
-    simple: true
-    range-loops: true
-    for-loops: false
-
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - dupImport # https://github.com/go-critic/go-critic/issues/845
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-      - wrapperFunc
-      - importShadow # not important for now
-      - unnamedResult # not important for now
-
-  funlen:
-    lines: 100
-    statements: 50
-
-  godox:
-    keywords:
-      - NOTE
-      - OPTIMIZE
-      - HACK
-
-  dogsled:
-    max-blank-identifiers: 2
-
-  whitespace:
-    multi-if: false
-    multi-func: false
 
 linters:
-  disable-all: true
   enable:
     # Default linters
     - errcheck
@@ -116,7 +18,7 @@ linters:
     - staticcheck
     - typecheck
     - unused
-    
+
     # Additional linters
     - asciicheck
     - bodyclose
@@ -137,7 +39,7 @@ linters:
     - gofumpt
     - goheader
     - goimports
-    - gomnd
+    - mnd
     - gomodguard
     - goprintffuncname
     - gosec
@@ -165,52 +67,5 @@ linters:
     - wsl
 
 issues:
-  exclude-rules:
-    # Exclude some linters from running on tests files
-    - path: _test\.go
-      linters:
-        - gocyclo
-        - errcheck
-        - dupl
-        - gosec
-        - funlen
-        - goconst
-        - gocognit
-        - scopelint
-        - lll
-
-    # Exclude some staticcheck messages
-    - linters:
-        - staticcheck
-      text: "SA9003:"
-
-    # Exclude lll issues for long lines with go:generate
-    - linters:
-        - lll
-      source: "^//go:generate "
-
-    # Exclude godox issues for TODO comments in development
-    - linters:
-        - godox
-      text: "TODO"
-
-    # Exclude some govet false positives
-    - linters:
-        - govet
-      text: "declaration of \"err\" shadows declaration at"
-
-  exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
-  new: false
-
-severity:
-  default-severity: error
-  case-sensitive: false
-  rules:
-    - linters:
-        - dupl
-      severity: info
-    - linters:
-        - gocritic
-      severity: info

@@ -7,7 +7,7 @@
   - Set up basic error types and configuration structs
   - _Requirements: 5.1, 5.2_
 
-- [ ] 2. Implement AsyncAPI data models and parsing foundation
+- [x] 2. Implement AsyncAPI data models and parsing foundation
 
   - [x] 2.1 Create AsyncAPI schema data structures
 
@@ -23,7 +23,7 @@
     - Write unit tests with valid and invalid AsyncAPI samples
     - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 3. Implement schema resolution and reference handling
+- [x] 3. Implement schema resolution and reference handling
 
   - [x] 3.1 Create schema resolver for external references
     - Implement $ref resolution for local and external schema references
@@ -132,3 +132,28 @@
     - Add version information and build metadata
     - Create release artifacts and installation instructions
     - _Requirements: 3.1, 3.6_
+
+- [ ] 10. Code quality improvements and optimizations
+
+  - [ ] 10.1 Address linting issues and code quality improvements
+
+    - Replace interface{} with any for Go 1.18+ compatibility
+    - Fix unused parameters and simplify loops using slices.Contains
+    - Optimize string operations using fmt.Fprintf instead of WriteString(fmt.Sprintf)
+    - Use strings.CutPrefix instead of HasPrefix + TrimPrefix combinations
+    - _Requirements: 4.4, 4.5_
+
+  - [ ] 10.2 Enhance nested object handling
+
+    - Improve nested struct generation to create separate type definitions
+    - Add proper handling of deeply nested object structures
+    - Ensure generated nested structs have proper naming and avoid conflicts
+    - Write tests for complex nested object scenarios
+    - _Requirements: 2.1, 2.5, 4.2_
+
+  - [ ] 10.3 Add missing CLI tests
+    - Create comprehensive unit tests for CLI configuration and argument parsing
+    - Add integration tests for CLI error scenarios and edge cases
+    - Test CLI help output and usage information display
+    - Verify CLI exit codes for different error conditions
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_

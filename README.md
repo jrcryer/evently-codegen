@@ -30,19 +30,6 @@ curl -fsSL https://raw.githubusercontent.com/jrcryer/evently-codegen/main/script
 
 ### Package Managers
 
-#### Homebrew (macOS/Linux)
-
-```bash
-# Add tap (once)
-brew tap jrcryer/evently-codegen
-
-# Install
-brew install evently-codegen
-
-# Update
-brew upgrade evently-codegen
-```
-
 #### Go Install
 
 ```bash
