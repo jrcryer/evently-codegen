@@ -28,18 +28,18 @@ func TestAsyncAPIVersionCompatibility(t *testing.T) {
 		{"4.0.0", false, "AsyncAPI 4.0.0 - Future version (unsupported)"},
 	}
 
-	baseSchema := map[string]interface{}{
-		"info": map[string]interface{}{
+	baseSchema := map[string]any{
+		"info": map[string]any{
 			"title":   "Version Compatibility Test",
 			"version": "1.0.0",
 		},
-		"components": map[string]interface{}{
-			"schemas": map[string]interface{}{
-				"TestMessage": map[string]interface{}{
+		"components": map[string]any{
+			"schemas": map[string]any{
+				"TestMessage": map[string]any{
 					"type": "object",
-					"properties": map[string]interface{}{
-						"id":      map[string]interface{}{"type": "string"},
-						"message": map[string]interface{}{"type": "string"},
+					"properties": map[string]any{
+						"id":      map[string]any{"type": "string"},
+						"message": map[string]any{"type": "string"},
 					},
 					"required": []string{"id"},
 				},
@@ -50,7 +50,7 @@ func TestAsyncAPIVersionCompatibility(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("version_%s", strings.ReplaceAll(tc.version, ".", "_")), func(t *testing.T) {
 			// Create spec with specific version
-			spec := make(map[string]interface{})
+			spec := make(map[string]any)
 			for k, v := range baseSchema {
 				spec[k] = v
 			}
@@ -545,14 +545,14 @@ func TestVersionDetection(t *testing.T) {
 
 // TestCrossVersionConsistency tests that the same schema generates consistent output across supported versions
 func TestCrossVersionConsistency(t *testing.T) {
-	baseSchema := map[string]interface{}{
-		"info": map[string]interface{}{
+	baseSchema := map[string]any{
+		"info": map[string]any{
 			"title":   "Consistency Test",
 			"version": "1.0.0",
 		},
-		"components": map[string]interface{}{
-			"schemas": map[string]interface{}{
-				"ConsistentMessage": map[string]interface{}{
+		"components": map[string]any{
+			"schemas": map[string]any{
+				"ConsistentMessage": map[string]any{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"id":        map[string]interface{}{"type": "string"},

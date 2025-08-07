@@ -29,6 +29,11 @@ This feature involves creating a Go library with a CLI interface that can parse 
 4. WHEN schema properties are optional THEN the system SHALL generate Go struct fields as pointer types or with appropriate zero values
 5. WHEN nested objects are defined in schemas THEN the system SHALL generate nested Go struct definitions
 6. WHEN array types are defined in schemas THEN the system SHALL generate Go slice types with appropriate element types
+7. WHEN oneOf types are defined in schemas THEN the system SHALL generate Go structs that support polymorphism using interface types or union structs
+8. WHEN schema properties are defined with enum property THEN the system SHALL generate Go type aliases with const declarations for each enum value, providing type safety and code completion
+9. WHEN enum properties contain string values THEN the system SHALL generate a custom string type with const declarations for each allowed value
+10. WHEN enum properties contain numeric values THEN the system SHALL generate a custom numeric type with const declarations for each allowed value
+11. WHEN schema properties have validation constraints (min/max length, patterns) THEN the system SHALL include validation tags in the generated Go struct fields
 
 ### Requirement 3
 
@@ -65,3 +70,16 @@ This feature involves creating a Go library with a CLI interface that can parse 
 2. WHEN using the library programmatically THEN the system SHALL provide public functions for generating Go type definitions
 3. WHEN using the library programmatically THEN the system SHALL return structured error types that can be handled appropriately
 4. WHEN using the library programmatically THEN the system SHALL allow configuration of generation options through function parameters or configuration structs
+
+### Requirement 6
+
+**User Story:** As a Go developer, I want the generated Go types to include JSON validation capabilities, so that I can validate incoming JSON data against the AsyncAPI specification at runtime.
+
+#### Acceptance Criteria
+
+1. WHEN generating Go struct types THEN the system SHALL include validation methods for each struct
+2. WHEN a validation method is called with valid JSON data THEN the system SHALL return no errors
+3. WHEN a validation method is called with invalid JSON data THEN the system SHALL return descriptive validation errors
+4. WHEN schema properties have validation constraints (min/max length, patterns, enums) THEN the system SHALL enforce these constraints during validation
+5. WHEN required fields are missing from JSON data THEN the system SHALL return validation errors indicating the missing fields
+6. WHEN JSON data contains extra fields not defined in the schema THEN the system SHALL handle them according to configuration (ignore or error)

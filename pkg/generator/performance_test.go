@@ -45,20 +45,20 @@ func BenchmarkParseSmallSchema(b *testing.B) {
 // BenchmarkParseMediumSchema benchmarks parsing of medium-sized AsyncAPI schemas
 func BenchmarkParseMediumSchema(b *testing.B) {
 	// Generate a medium-sized schema with 20 properties
-	properties := make(map[string]interface{})
+	properties := make(map[string]any)
 	for i := 0; i < 20; i++ {
-		properties[fmt.Sprintf("field%d", i)] = map[string]interface{}{
+		properties[fmt.Sprintf("field%d", i)] = map[string]any{
 			"type":        "string",
 			"description": fmt.Sprintf("Field %d description", i),
 		}
 	}
 
-	spec := map[string]interface{}{
+	spec := map[string]any{
 		"asyncapi": "2.6.0",
-		"info":     map[string]interface{}{"title": "Medium Schema", "version": "1.0.0"},
-		"components": map[string]interface{}{
-			"schemas": map[string]interface{}{
-				"MediumSchema": map[string]interface{}{
+		"info":     map[string]any{"title": "Medium Schema", "version": "1.0.0"},
+		"components": map[string]any{
+			"schemas": map[string]any{
+				"MediumSchema": map[string]any{
 					"type":       "object",
 					"properties": properties,
 				},
@@ -85,7 +85,7 @@ func BenchmarkParseMediumSchema(b *testing.B) {
 // BenchmarkParseLargeSchema benchmarks parsing of large AsyncAPI schemas
 func BenchmarkParseLargeSchema(b *testing.B) {
 	// Generate a large schema with 100 properties
-	properties := make(map[string]interface{})
+	properties := make(map[string]any)
 	for i := 0; i < 100; i++ {
 		var propType string
 		switch i % 4 {
@@ -99,18 +99,18 @@ func BenchmarkParseLargeSchema(b *testing.B) {
 			propType = "boolean"
 		}
 
-		properties[fmt.Sprintf("field%d", i)] = map[string]interface{}{
+		properties[fmt.Sprintf("field%d", i)] = map[string]any{
 			"type":        propType,
 			"description": fmt.Sprintf("Field %d description with longer text to simulate real-world schemas", i),
 		}
 	}
 
-	spec := map[string]interface{}{
+	spec := map[string]any{
 		"asyncapi": "2.6.0",
-		"info":     map[string]interface{}{"title": "Large Schema", "version": "1.0.0"},
-		"components": map[string]interface{}{
-			"schemas": map[string]interface{}{
-				"LargeSchema": map[string]interface{}{
+		"info":     map[string]any{"title": "Large Schema", "version": "1.0.0"},
+		"components": map[string]any{
+			"schemas": map[string]any{
+				"LargeSchema": map[string]any{
 					"type":       "object",
 					"properties": properties,
 				},
@@ -269,27 +269,27 @@ func BenchmarkParseAndGenerate(b *testing.B) {
 
 // BenchmarkMultipleSchemas benchmarks generation with multiple schemas
 func BenchmarkMultipleSchemas(b *testing.B) {
-	schemas := make(map[string]interface{})
+	schemas := make(map[string]any)
 
 	// Create 10 different schemas
 	for i := 0; i < 10; i++ {
-		properties := make(map[string]interface{})
+		properties := make(map[string]any)
 		for j := 0; j < 10; j++ {
-			properties[fmt.Sprintf("field%d", j)] = map[string]interface{}{
+			properties[fmt.Sprintf("field%d", j)] = map[string]any{
 				"type": "string",
 			}
 		}
 
-		schemas[fmt.Sprintf("Schema%d", i)] = map[string]interface{}{
+		schemas[fmt.Sprintf("Schema%d", i)] = map[string]any{
 			"type":       "object",
 			"properties": properties,
 		}
 	}
 
-	spec := map[string]interface{}{
+	spec := map[string]any{
 		"asyncapi": "2.6.0",
-		"info":     map[string]interface{}{"title": "Multi Schema", "version": "1.0.0"},
-		"components": map[string]interface{}{
+		"info":     map[string]any{"title": "Multi Schema", "version": "1.0.0"},
+		"components": map[string]any{
 			"schemas": schemas,
 		},
 	}
@@ -319,20 +319,20 @@ func TestMemoryUsage(t *testing.T) {
 	runtime.ReadMemStats(&m1)
 
 	// Generate a very large schema
-	properties := make(map[string]interface{})
+	properties := make(map[string]any)
 	for i := 0; i < 1000; i++ {
-		properties[fmt.Sprintf("field%d", i)] = map[string]interface{}{
+		properties[fmt.Sprintf("field%d", i)] = map[string]any{
 			"type":        "string",
 			"description": fmt.Sprintf("Field %d with a long description to increase memory usage", i),
 		}
 	}
 
-	spec := map[string]interface{}{
+	spec := map[string]any{
 		"asyncapi": "2.6.0",
-		"info":     map[string]interface{}{"title": "Memory Test", "version": "1.0.0"},
-		"components": map[string]interface{}{
-			"schemas": map[string]interface{}{
-				"LargeSchema": map[string]interface{}{
+		"info":     map[string]any{"title": "Memory Test", "version": "1.0.0"},
+		"components": map[string]any{
+			"schemas": map[string]any{
+				"LargeSchema": map[string]any{
 					"type":       "object",
 					"properties": properties,
 				},
@@ -396,20 +396,20 @@ func TestProcessingSpeed(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Generate schema with specified field count
-			properties := make(map[string]interface{})
+			properties := make(map[string]any)
 			for i := 0; i < tc.fieldCount; i++ {
-				properties[fmt.Sprintf("field%d", i)] = map[string]interface{}{
+				properties[fmt.Sprintf("field%d", i)] = map[string]any{
 					"type":        "string",
 					"description": fmt.Sprintf("Field %d description", i),
 				}
 			}
 
-			spec := map[string]interface{}{
+			spec := map[string]any{
 				"asyncapi": "2.6.0",
-				"info":     map[string]interface{}{"title": "Speed Test", "version": "1.0.0"},
-				"components": map[string]interface{}{
-					"schemas": map[string]interface{}{
-						"SpeedTestSchema": map[string]interface{}{
+				"info":     map[string]any{"title": "Speed Test", "version": "1.0.0"},
+				"components": map[string]any{
+					"schemas": map[string]any{
+						"SpeedTestSchema": map[string]any{
 							"type":       "object",
 							"properties": properties,
 						},

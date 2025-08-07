@@ -292,8 +292,8 @@ func (r *DefaultSchemaResolver) loadHTTP(url string) ([]byte, error) {
 // loadFile loads a document from the file system
 func (r *DefaultSchemaResolver) loadFile(path string) ([]byte, error) {
 	// Convert file:// URLs to file paths
-	if strings.HasPrefix(path, "file://") {
-		path = strings.TrimPrefix(path, "file://")
+	if newPath, found := strings.CutPrefix(path, "file://"); found {
+		path = newPath
 	}
 
 	// Clean the path

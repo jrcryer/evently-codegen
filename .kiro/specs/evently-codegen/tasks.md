@@ -133,9 +133,9 @@
     - Create release artifacts and installation instructions
     - _Requirements: 3.1, 3.6_
 
-- [ ] 10. Code quality improvements and optimizations
+- [x] 10. Code quality improvements and optimizations
 
-  - [ ] 10.1 Address linting issues and code quality improvements
+  - [x] 10.1 Address linting issues and code quality improvements
 
     - Replace interface{} with any for Go 1.18+ compatibility
     - Fix unused parameters and simplify loops using slices.Contains
@@ -143,7 +143,7 @@
     - Use strings.CutPrefix instead of HasPrefix + TrimPrefix combinations
     - _Requirements: 4.4, 4.5_
 
-  - [ ] 10.2 Enhance nested object handling
+  - [x] 10.2 Enhance nested object handling
 
     - Improve nested struct generation to create separate type definitions
     - Add proper handling of deeply nested object structures
@@ -151,9 +151,111 @@
     - Write tests for complex nested object scenarios
     - _Requirements: 2.1, 2.5, 4.2_
 
-  - [ ] 10.3 Add missing CLI tests
+  - [x] 10.3 Add missing CLI tests
     - Create comprehensive unit tests for CLI configuration and argument parsing
     - Add integration tests for CLI error scenarios and edge cases
     - Test CLI help output and usage information display
     - Verify CLI exit codes for different error conditions
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
+
+- [x] 11. Implement JSON Schema validation capabilities
+
+  - [x] 11.1 Create validation interface and core validation logic
+
+    - Define Validator interface for JSON schema validation
+    - Implement core validation engine that can validate JSON against AsyncAPI schemas
+    - Add support for basic type validation (string, number, boolean, array, object)
+    - Write unit tests for basic validation scenarios
+    - _Requirements: 6.1, 6.2, 6.3_
+
+  - [x] 11.2 Implement constraint validation
+
+    - Add validation for string constraints (minLength, maxLength, pattern)
+    - Add validation for numeric constraints (minimum, maximum, multipleOf)
+    - Add validation for array constraints (minItems, maxItems, uniqueItems)
+    - Add validation for enum value constraints
+    - Write unit tests for all constraint validation scenarios
+    - _Requirements: 6.4_
+
+  - [x] 11.3 Add required field and additional properties validation
+
+    - Implement validation for required fields in JSON objects
+    - Add configurable handling of additional properties (strict/permissive modes)
+    - Generate descriptive error messages for missing required fields
+    - Write unit tests for required field validation scenarios
+    - _Requirements: 6.5, 6.6_
+
+  - [x] 11.4 Generate validation methods for Go structs
+
+    - Modify code generator to include Validate() methods on generated structs
+    - Add ValidateJSON() methods that accept raw JSON input
+    - Ensure validation methods return structured error types with field paths
+    - Write integration tests that validate generated validation methods work correctly
+    - _Requirements: 6.1, 6.2, 6.3_
+
+  - [x] 11.5 Add EventBridge-specific validation features
+    - Implement validation for AWS EventBridge event structure requirements
+    - Add support for validating event detail payload against AsyncAPI schemas
+    - Create helper functions for validating EventBridge event patterns
+    - Write tests with sample EventBridge events and AsyncAPI schemas
+    - _Requirements: 6.1, 6.2, 6.3, 6.4_
+
+- [x] 12. Implement Go enum type generation for AsyncAPI enum properties
+
+  - [x] 12.1 Enhance type mapper to detect and handle enum properties
+
+    - Modify MapProperty method to detect when a property has enum values
+    - Create enum type generation logic for string and numeric enums
+    - Generate custom type aliases with const declarations for enum values
+    - Write unit tests for enum type mapping scenarios
+    - _Requirements: 2.8, 2.9, 2.10_
+
+  - [x] 12.2 Update code generator to produce enum type definitions
+
+    - Modify GenerateTypes to create separate enum type definitions
+    - Generate const blocks with proper Go naming conventions for enum values
+    - Ensure enum types are used in struct field declarations instead of primitive types
+    - Add validation methods for enum types to check valid values
+    - Write integration tests that verify generated enum code compiles and works correctly
+    - _Requirements: 2.8, 2.9, 2.10, 4.1, 4.2_
+
+  - [x] 12.3 Add enum validation integration
+    - Update validation methods to use generated enum types for validation
+    - Ensure enum validation works with both struct validation and JSON validation
+    - Add proper error messages for invalid enum values that reference the allowed values
+    - Write tests that verify enum validation works correctly with generated types
+    - _Requirements: 2.8, 2.9, 2.10, 6.4_
+
+- [x] 13. Add comprehensive documentation for JSON validation functionality
+
+  - [x] 13.1 Update README with validation documentation section
+
+    - Add a new "JSON Validation" section to the main README
+    - Document the validation capabilities including schema validation, constraint validation, and EventBridge validation
+    - Include code examples showing how to use validation methods on generated structs
+    - Add examples of ValidateJSON methods and error handling
+    - _Requirements: 6.1, 6.2, 6.3, 6.4_
+
+  - [x] 13.2 Create validation usage example
+
+    - Create a new example in examples/validation_usage/ directory
+    - Demonstrate validation of JSON data against AsyncAPI schemas
+    - Show both successful validation and error scenarios
+    - Include examples of enum validation and constraint validation
+    - Show EventBridge-specific validation usage
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
+
+  - [x] 13.3 Add validation API documentation
+
+    - Document the Validator interface and SchemaValidator implementation
+    - Add comprehensive godoc comments for all validation methods
+    - Document ValidationResult and ValidationError types
+    - Include usage examples in godoc comments
+    - _Requirements: 6.1, 6.2, 6.3_
+
+  - [x] 13.4 Update examples README with validation information
+
+    - Add validation example to the examples overview
+    - Include validation in the "Running the Examples" section
+    - Add validation to the tips and customization guidance
+    - _Requirements: 6.1, 6.2_

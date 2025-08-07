@@ -16,12 +16,30 @@ func (e *ParseError) Error() string {
 	return fmt.Sprintf("parse error: %s", e.Message)
 }
 
-// ValidationError represents schema validation errors
+// ValidationError represents a single schema validation error with field path and message.
+// It provides detailed information about what validation rule was violated
+// and where in the data structure the error occurred.
+//
+// ValidationError implements the error interface and can be used as a standard Go error.
+//
+// Example:
+//
+//	err := &ValidationError{
+//	    Field:   "user.profile.age",
+//	    Message: "value 200 exceeds maximum 150",
+//	}
+//	fmt.Println(err.Error()) // "validation error in field 'user.profile.age': value 200 exceeds maximum 150"
 type ValidationError struct {
-	Field   string
+	// Field is the path to the field that failed validation (e.g., "user.profile.age").
+	// An empty field indicates a root-level validation error.
+	Field string
+
+	// Message is a human-readable description of the validation error.
 	Message string
 }
 
+// Error implements the error interface for ValidationError.
+// It returns a formatted error message that includes the field path (if available) and the validation message.
 func (e *ValidationError) Error() string {
 	if e.Field != "" {
 		return fmt.Sprintf("validation error in field '%s': %s", e.Field, e.Message)

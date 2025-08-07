@@ -248,6 +248,213 @@ func (g *Generator) ParseAndGenerate(data []byte) (*GenerateResult, error)
 func (g *Generator) ParseFileAndGenerateToFiles(filePath string) error
 ```
 
+## JSON Validation
+
+The generated Go structs include built-in validation methods that allow you to validate JSON data against the original AsyncAPI schema at runtime. This ensures data integrity and helps catch schema violations early.
+
+### Validation Features
+
+- **Schema Validation**: Validates JSON data against AsyncAPI schema constraints
+- **Type Validation**: Ensures correct data types (string, number, boolean, array, object)
+- **Constraint Validation**: Enforces string length, numeric ranges, array size limits
+- **Enum Validation**: Validates enum values with type safety
+- **Required Field Validation**: Checks for missing required properties
+- **EventBridge Support**: Special validation for AWS EventBridge event structures
+
+### Generated Validation Methods
+
+Every generated struct includes two validation methods:
+
+```go
+// Validate validates the struct instance against its schema
+func (s *UserSignupPayload) Validate() *ValidationResult
+
+// ValidateJSON validates raw JSON data against the schema
+func (s *UserSignupPayload) ValidateJSON(jsonData []byte) *ValidationResult
+```
+
+### Basic Usage Example
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+    "github.com/jrcryer/evently-codegen/pkg/generator"
+)
+
+func main() {
+    // Create a struct instance
+    user := &UserSignupPayload{
+        UserId: "user123",
+        Email:  "user@example.com",
+        Profile: &UserSignupPayloadProfile{
+            FirstName: stringPtr("John"),
+            LastName:  stringPtr("Doe"),
+            Age:       intPtr(30),
+        },
+    }
+    
+    // Validate the struct instance
+    result := user.Validate()
+    if !result.Valid {
+        log.Printf("Validation failed: %v", result.Errors)
+        return
+    }
+    
+    fmt.Println("Struct validation passed!")
+    
+    // Validate JSON data
+    jsonData := []byte(`{
+        "userId": "user456",
+        "email": "jane@example.com",
+        "profile": {
+            "firstName": "Jane",
+            "age": 25
+        }
+    }`)
+    
+    result = user.ValidateJSON(jsonData)
+    if !result.Valid {
+        log.Printf("JSON validation failed: %v", result.Errors)
+        return
+    }
+    
+    fmt.Println("JSON validation passed!")
+}
+
+func stringPtr(s string) *string { return &s }
+func intPtr(i int) *int { return &i }
+```
+
+### Validation Error Handling
+
+The `ValidationResult` type provides detailed error information:
+
+```go
+type ValidationResult struct {
+    Valid  bool               `json:"valid"`
+    Errors []*ValidationError `json:"errors,omitempty"`
+}
+
+type ValidationError struct {
+    Field   string `json:"field"`
+    Message string `json:"message"`
+}
+```
+
+Example error handling:
+
+```go
+result := user.ValidateJSON(invalidJSON)
+if !result.Valid {
+    for _, err := range result.Errors {
+        fmt.Printf("Field '%s': %s\n", err.Field, err.Message)
+    }
+}
+```
+
+### Enum Validation
+
+Generated enum types include validation methods:
+
+```go
+// For an enum field like "status" with values ["active", "inactive", "pending"]
+type UserStatusEnum string
+
+const (
+    UserStatusActive   UserStatusEnum = "active"
+    UserStatusInactive UserStatusEnum = "inactive"
+    UserStatusPending  UserStatusEnum = "pending"
+)
+
+// IsValid returns true if the enum value is valid
+func (e UserStatusEnum) IsValid() bool {
+    switch e {
+    case UserStatusActive, UserStatusInactive, UserStatusPending:
+        return true
+    default:
+        return false
+    }
+}
+
+// UserStatusEnumValues returns all valid values
+func UserStatusEnumValues() []UserStatusEnum {
+    return []UserStatusEnum{
+        UserStatusActive,
+        UserStatusInactive,
+        UserStatusPending,
+    }
+}
+```
+
+### EventBridge Validation
+
+For AWS EventBridge events, use the specialized EventBridge validator:
+
+```go
+import "github.com/jrcryer/evently-codegen/pkg/generator"
+
+func validateEventBridgeEvent() {
+    validator := generator.NewEventBridgeValidator()
+    
+    // Validate EventBridge event structure
+    eventJSON := []byte(`{
+        "version": "0",
+        "id": "12345678-1234-1234-1234-123456789012",
+        "detail-type": "User Signup",
+        "source": "com.example.userservice",
+        "account": "123456789012",
+        "time": "2023-01-01T12:00:00Z",
+        "region": "us-east-1",
+        "detail": {
+            "userId": "user123",
+            "email": "user@example.com"
+        }
+    }`)
+    
+    result := validator.ValidateEventBridgeEvent(eventJSON)
+    if !result.Valid {
+        log.Printf("EventBridge validation failed: %v", result.Errors)
+        return
+    }
+    
+    // Validate with detail schema
+    detailSchema := &generator.MessageSchema{
+        Type: "object",
+        Properties: map[string]*generator.Property{
+            "userId": {Type: "string"},
+            "email":  {Type: "string"},
+        },
+        Required: []string{"userId", "email"},
+    }
+    
+    result = validator.ValidateEventBridgeEventWithSchema(eventJSON, detailSchema)
+    if !result.Valid {
+        log.Printf("Detail validation failed: %v", result.Errors)
+        return
+    }
+    
+    fmt.Println("EventBridge event validation passed!")
+}
+```
+
+### Validation Configuration
+
+Create validators with different configurations:
+
+```go
+// Strict mode - rejects additional properties
+strictValidator := generator.NewValidator(true)
+
+// Permissive mode - allows additional properties (default)
+permissiveValidator := generator.NewValidator(false)
+
+// Use custom validator
+result := strictValidator.ValidateJSON(jsonData, schema)
+```
+
 ## Generated Code Examples
 
 ### Input AsyncAPI Schema
@@ -271,6 +478,10 @@ channels:
               type: string
               format: email
               description: User's email address
+            status:
+              type: string
+              enum: ["active", "inactive", "pending"]
+              description: User status
             profile:
               type: object
               properties:
@@ -280,6 +491,8 @@ channels:
                   type: string
                 age:
                   type: integer
+                  minimum: 0
+                  maximum: 150
           required: [userId, email]
 ```
 
@@ -287,10 +500,6 @@ channels:
 
 ```go
 package events
-
-import (
-    "time"
-)
 
 // UserSignupPayload represents the payload for user/signup channel
 type UserSignupPayload struct {
@@ -300,6 +509,9 @@ type UserSignupPayload struct {
     // User's email address
     Email string `json:"email"`
     
+    // User status
+    Status UserSignupPayloadStatusEnum `json:"status,omitempty"`
+    
     Profile *UserSignupPayloadProfile `json:"profile,omitempty"`
 }
 
@@ -308,6 +520,66 @@ type UserSignupPayloadProfile struct {
     FirstName *string `json:"firstName,omitempty"`
     LastName  *string `json:"lastName,omitempty"`
     Age       *int    `json:"age,omitempty"`
+}
+
+// UserSignupPayloadStatusEnum represents the status enum
+type UserSignupPayloadStatusEnum string
+
+const (
+    UserSignupPayloadStatusActive   UserSignupPayloadStatusEnum = "active"
+    UserSignupPayloadStatusInactive UserSignupPayloadStatusEnum = "inactive"
+    UserSignupPayloadStatusPending  UserSignupPayloadStatusEnum = "pending"
+)
+
+// IsValid returns true if the enum value is valid
+func (e UserSignupPayloadStatusEnum) IsValid() bool {
+    switch e {
+    case UserSignupPayloadStatusActive, UserSignupPayloadStatusInactive, UserSignupPayloadStatusPending:
+        return true
+    default:
+        return false
+    }
+}
+
+// Validate validates the UserSignupPayload struct against its schema
+func (s *UserSignupPayload) Validate() *ValidationResult {
+    validator := NewValidator(false)
+    schema := &Property{
+        Type: "object",
+        Properties: map[string]*Property{
+            "userId": {Type: "string"},
+            "email":  {Type: "string"},
+            "status": {Type: "string", Enum: []interface{}{"active", "inactive", "pending"}},
+            "profile": {Type: "object"},
+        },
+        Required: []string{"userId", "email"},
+    }
+    
+    data := map[string]any{
+        "userId":  s.UserId,
+        "email":   s.Email,
+        "status":  s.Status,
+        "profile": s.Profile,
+    }
+    
+    return validator.ValidateValue(data, schema, "")
+}
+
+// ValidateJSON validates raw JSON data against the UserSignupPayload schema
+func (s *UserSignupPayload) ValidateJSON(jsonData []byte) *ValidationResult {
+    validator := NewValidator(false)
+    schema := &MessageSchema{
+        Type: "object",
+        Properties: map[string]*Property{
+            "userId": {Type: "string"},
+            "email":  {Type: "string"},
+            "status": {Type: "string", Enum: []interface{}{"active", "inactive", "pending"}},
+            "profile": {Type: "object"},
+        },
+        Required: []string{"userId", "email"},
+    }
+    
+    return validator.ValidateJSON(jsonData, schema)
 }
 ```
 
@@ -320,8 +592,18 @@ type UserSignupPayloadProfile struct {
 - ✅ Array types with typed elements
 - ✅ Optional and required fields
 - ✅ String formats (date-time, email, etc.)
-- ✅ Enumerations
+- ✅ Enumerations with type-safe constants
 - ✅ Schema references ($ref)
+
+### Validation Features
+
+- ✅ JSON schema validation against AsyncAPI specifications
+- ✅ Type validation (string, number, boolean, array, object)
+- ✅ Constraint validation (min/max length, numeric ranges, patterns)
+- ✅ Enum validation with generated type-safe constants
+- ✅ Required field validation
+- ✅ EventBridge event structure validation
+- ✅ Configurable strict/permissive validation modes
 
 ### AsyncAPI Versions
 

@@ -84,7 +84,7 @@
 //   - integer → int64
 //   - boolean → bool
 //   - array → []T (where T is the element type)
-//   - object → struct or interface{}
+//   - object → struct or any
 //   - string with date-time format → time.Time
 //   - string with email format → string
 //   - integer with int32 format → int32

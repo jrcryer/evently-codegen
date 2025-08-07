@@ -303,21 +303,21 @@ func TestResolveJSONPointer(t *testing.T) {
 	resolver := NewSchemaResolver("")
 
 	// Test document
-	document := map[string]interface{}{
-		"definitions": map[string]interface{}{
-			"User": map[string]interface{}{
+	document := map[string]any{
+		"definitions": map[string]any{
+			"User": map[string]any{
 				"type": "object",
-				"properties": map[string]interface{}{
-					"name": map[string]interface{}{
+				"properties": map[string]any{
+					"name": map[string]any{
 						"type": "string",
 					},
 				},
 			},
 		},
-		"items": []interface{}{
+		"items": []any{
 			"first",
 			"second",
-			map[string]interface{}{
+			map[string]any{
 				"nested": "value",
 			},
 		},
@@ -326,7 +326,7 @@ func TestResolveJSONPointer(t *testing.T) {
 	tests := []struct {
 		name        string
 		pointer     string
-		expected    interface{}
+		expected    any
 		expectError bool
 	}{
 		{
@@ -344,7 +344,7 @@ func TestResolveJSONPointer(t *testing.T) {
 		{
 			name:        "nested property",
 			pointer:     "/definitions/User",
-			expected:    document["definitions"].(map[string]interface{})["User"],
+			expected:    document["definitions"].(map[string]any)["User"],
 			expectError: false,
 		},
 		{
@@ -408,7 +408,7 @@ func TestResolveJSONPointer_EscapedTokens(t *testing.T) {
 	resolver := NewSchemaResolver("")
 
 	// Test document with special characters
-	document := map[string]interface{}{
+	document := map[string]any{
 		"a/b":   "slash",
 		"c~d":   "tilde",
 		"e~f/g": "both",
@@ -454,19 +454,19 @@ func TestConvertToMessageSchema(t *testing.T) {
 	resolver := NewSchemaResolver("")
 
 	// Test data that should convert to MessageSchema
-	data := map[string]interface{}{
+	data := map[string]any{
 		"type":        "object",
 		"title":       "User",
 		"description": "A user object",
-		"properties": map[string]interface{}{
-			"name": map[string]interface{}{
+		"properties": map[string]any{
+			"name": map[string]any{
 				"type": "string",
 			},
-			"age": map[string]interface{}{
+			"age": map[string]any{
 				"type": "integer",
 			},
 		},
-		"required": []interface{}{"name"},
+		"required": []any{"name"},
 	}
 
 	schema, err := resolver.convertToMessageSchema(data)
@@ -499,7 +499,7 @@ func TestConvertToProperty(t *testing.T) {
 	resolver := NewSchemaResolver("")
 
 	// Test data that should convert to Property
-	data := map[string]interface{}{
+	data := map[string]any{
 		"type":        "string",
 		"description": "A string property",
 		"format":      "email",
@@ -623,7 +623,7 @@ title: YAML Schema`
 		t.Errorf("Failed to load JSON document: %v", err)
 	}
 
-	if jsonMap, ok := jsonDoc.(map[string]interface{}); ok {
+	if jsonMap, ok := jsonDoc.(map[string]any); ok {
 		if jsonMap["title"] != "JSON Schema" {
 			t.Errorf("Expected title 'JSON Schema', got %v", jsonMap["title"])
 		}
@@ -637,7 +637,7 @@ title: YAML Schema`
 		t.Errorf("Failed to load YAML document: %v", err)
 	}
 
-	if yamlMap, ok := yamlDoc.(map[string]interface{}); ok {
+	if yamlMap, ok := yamlDoc.(map[string]any); ok {
 		if yamlMap["title"] != "YAML Schema" {
 			t.Errorf("Expected title 'YAML Schema', got %v", yamlMap["title"])
 		}
@@ -671,12 +671,12 @@ func TestIntegrationResolveRef_LocalFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	schemaFile := filepath.Join(tmpDir, "schema.json")
 
-	schemaData := map[string]interface{}{
-		"definitions": map[string]interface{}{
-			"User": map[string]interface{}{
+	schemaData := map[string]any{
+		"definitions": map[string]any{
+			"User": map[string]any{
 				"type": "object",
-				"properties": map[string]interface{}{
-					"name": map[string]interface{}{
+				"properties": map[string]any{
+					"name": map[string]any{
 						"type": "string",
 					},
 					"email": map[string]interface{}{

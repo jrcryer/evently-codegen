@@ -347,11 +347,37 @@ type GoStruct struct {
 	Comments    []string
 }
 
+// EnumInfo contains information about an enum type
+type EnumInfo struct {
+	TypeName string
+	Values   []interface{}
+	BaseType string
+}
+
+// EnumType represents a Go enum type definition
+type EnumType struct {
+	Name     string
+	BaseType string
+	Values   []EnumValue
+	Comment  string
+}
+
+// EnumValue represents a single enum value
+type EnumValue struct {
+	Name    string
+	Value   interface{}
+	Comment string
+}
+
 // GoField represents a Go struct field
 type GoField struct {
-	Name     string
-	Type     string
-	JSONTag  string
-	Comment  string
-	Optional bool
+	Name          string
+	Type          string
+	JSONTag       string
+	Comment       string
+	Optional      bool
+	IsEnum        bool
+	EnumValues    []interface{}
+	EnumBaseType  string
+	ArrayItemEnum *EnumInfo // For arrays of enums
 }

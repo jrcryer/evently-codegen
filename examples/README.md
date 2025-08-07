@@ -32,7 +32,17 @@ Showcases advanced library features:
 - Error handling strategies
 - Performance optimization techniques
 
-### 5. Integration Examples (`integration/`)
+### 5. Validation Usage (`validation_usage/`)
+Comprehensive validation functionality demonstration:
+- Basic struct validation using generated `Validate()` methods
+- JSON validation using generated `ValidateJSON()` methods
+- Constraint validation (string length, numeric ranges, patterns)
+- Enum validation with type-safe constants
+- EventBridge-specific validation for AWS events
+- Error handling and categorization
+- Custom validator configuration (strict vs permissive modes)
+
+### 6. Integration Examples (`integration/`)
 Real-world integration scenarios:
 - Using with Go modules
 - Integration with build systems
@@ -60,6 +70,10 @@ cd examples/cli_examples
 cd examples/advanced_features
 go run main.go
 
+# Run validation usage example
+cd examples/validation_usage
+go run main.go
+
 # Run integration examples
 cd examples/integration
 go run main.go
@@ -76,6 +90,49 @@ The examples use sample AsyncAPI specifications located in the `../testdata/` di
 
 Each example includes comments showing what the generated Go code looks like, helping you understand the transformation from AsyncAPI schemas to Go types.
 
+## Validation Features
+
+The generated Go structs include built-in validation methods that provide runtime data validation:
+
+### Generated Validation Methods
+
+Every generated struct includes two validation methods:
+
+```go
+// Validate validates the struct instance against its schema
+func (s *UserStruct) Validate() *ValidationResult
+
+// ValidateJSON validates raw JSON data against the schema  
+func (s *UserStruct) ValidateJSON(jsonData []byte) *ValidationResult
+```
+
+### Validation Capabilities
+
+- **Type Validation**: Ensures correct data types (string, number, boolean, array, object)
+- **Constraint Validation**: Enforces string length, numeric ranges, patterns, etc.
+- **Enum Validation**: Validates enum values with generated type-safe constants
+- **Required Field Validation**: Checks for missing required properties
+- **EventBridge Support**: Special validation for AWS EventBridge event structures
+- **Flexible Configuration**: Strict vs permissive validation modes
+
+### Example Usage
+
+```go
+// Validate a struct instance
+result := user.Validate()
+if !result.Valid {
+    for _, err := range result.Errors {
+        fmt.Printf("Field '%s': %s\n", err.Field, err.Message)
+    }
+}
+
+// Validate JSON data
+jsonData := []byte(`{"name": "John", "age": 30}`)
+result = user.ValidateJSON(jsonData)
+```
+
+See the `validation_usage` example for comprehensive validation demonstrations.
+
 ## Prerequisites
 
 - Go 1.19 or later
@@ -86,8 +143,9 @@ Each example includes comments showing what the generated Go code looks like, he
 1. **Start with Basic Usage**: Begin with the `basic_usage` example to understand core concepts
 2. **Explore File Operations**: Move to `file_operations` to see real-world file handling
 3. **Try CLI Examples**: Use `cli_examples` to understand command-line usage
-4. **Advanced Features**: Explore `advanced_features` for complex scenarios
-5. **Integration Patterns**: Check `integration` for production usage patterns
+4. **Learn Validation**: Check `validation_usage` to understand JSON validation capabilities
+5. **Advanced Features**: Explore `advanced_features` for complex scenarios
+6. **Integration Patterns**: Check `integration` for production usage patterns
 
 ## Customizing Examples
 
@@ -96,6 +154,8 @@ Feel free to modify the examples to experiment with different:
 - Generator configurations
 - Output formats and destinations
 - Error handling approaches
+- Validation scenarios and constraints
+- EventBridge event structures
 
 ## Contributing Examples
 

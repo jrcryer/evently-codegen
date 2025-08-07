@@ -75,7 +75,7 @@ func (p *AsyncAPIParser) ValidateVersion(version string) error {
 	}
 
 	// Normalize version (remove any 'v' prefix)
-	normalizedVersion := strings.TrimPrefix(version, "v")
+	normalizedVersion, _ := strings.CutPrefix(version, "v")
 
 	if slices.Contains(p.supportedVersions, normalizedVersion) {
 		return nil
